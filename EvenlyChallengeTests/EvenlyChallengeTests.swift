@@ -7,30 +7,33 @@
 
 import XCTest
 @testable import EvenlyChallenge
+import CoreLocation
 
-final class EvenlyChallengeTests: XCTestCase {
+final class ViewModelTests: XCTestCase {
+    
+    let viewModel = ViewModel(search: MockSearch(), evenlyHQCoordinates: CLLocationCoordinate2D(latitude: 52.500342, longitude: 13.425170))
+    
+    var pois1 = [
+        PointOfInterest(fsqID: "1", geocodes: Geocodes(main: Coordinates(latitude: 12.3, longitude: 12.3)), name: "First"),
+        PointOfInterest(fsqID: "2", geocodes: Geocodes(main: Coordinates(latitude: 22.3, longitude: 22.3)), name: "Second")
+    ]
+    
+    var pois2 = [
+        PointOfInterest(fsqID: "3", geocodes: Geocodes(main: Coordinates(latitude: 32.3, longitude: 32.3)), name: "Third"),
+        PointOfInterest(fsqID: "2", geocodes: Geocodes(main: Coordinates(latitude: 22.3, longitude: 22.3)), name: "Second")
+    ]
 
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-    }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
-    }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
+    func testViewDidLoad() {
+        let expectation1 = XCTestExpectation(description: "setCenter called")
+        viewModel.setCenter = { _ in
+            expectation1.fulfill()
         }
+        viewModel.search = MockSearch(currentPois: pois1)
+        viewModel.viewDidLoad()
+        viewModel.search = MockSearch(currentPois: pois2)
+        viewModel.viewDidLoad()
+        
+        wait(for: [expectation1], timeout: 0.1)
+        XCTAssertEqual(viewModel.annotations.count, 3)
     }
-
 }
